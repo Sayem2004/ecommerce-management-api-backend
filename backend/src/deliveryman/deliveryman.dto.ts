@@ -11,7 +11,7 @@ export class DeliverymanDTO {
 
     @IsNotEmpty()
     @MinLength(6)
-    @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
+    @Matches(/[A-Z]/, { message: 'Password must contain at least one_uppercase letter' })
     password: string;
 
     @IsIn(['male','female'])
