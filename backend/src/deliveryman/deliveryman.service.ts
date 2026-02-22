@@ -5,7 +5,7 @@ import { DeliverymanDTO } from "./deliveryman.dto";
 export class DeliverymanService {
 
     private data: DeliverymanDTO[] = [];
-
+    
     getAll(): object {
         return { message: "All Deliveryman", data: this.data };
     }
@@ -38,4 +38,6 @@ export class DeliverymanService {
     search(area: string): object {
         return { message: "Search Result", area: area };
     }
+
+   
 }
