@@ -7,7 +7,7 @@ export class DeliverymanService {
     private data: DeliverymanDTO[] = [];
     
     getAll(): object {
-        return { message: "All Deliveryman", data: this.data };
+        return { message: "All Deliveryman Show", data: this.data };
     }
 
     getById(id: number): object {
