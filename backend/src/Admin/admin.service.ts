@@ -1,108 +1,168 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { AdminDto } from './dto/admin.dto';
-export interface Admin {
-  id: number;
-  name: string;
-  mail: string;
-  username: string;
-  password: string;
-  createdAt: string;
-  socialLink: string;
-}
+import { Admin } from './admin.entity';
+
 @Injectable()
 export class AdminService {
 
-
-  private admins: Admin[] = [
-    {
-      id: 1,
-      name: 'sayem',
-      mail: 'sayem@gmail.com',
-      username: 'sayem-admin',
-      password: '123@',
-      createdAt: '2025-02-21',
-      socialLink: 'https://facebook.com/sayem'
-    },
-    {
-      id: 2,
-      name: 'sakib',
-      mail: 'sakib@gmail.com',
-      username: 'sakib',
-      password: '456@',
-      createdAt: '2025-02-21',
-      socialLink: 'https://facebook.com/sakib'
-    },
-  ];
+  constructor(
+    @InjectRepository(Admin)
+    private adminRepo: Repository<Admin>,
+  ) {}
 
 
-  findAll(): Admin[] {
-    return this.admins;
-  }
+  async findAll() {
+    const admins = await this.adminRepo.find();
+    
 
-
-  createAdmin(adminData: AdminDto) {
-
-    const newId = this.admins.length > 0
-      ? this.admins[this.admins.length - 1].id + 1
-      : 1;
-
-    const newAdmin: Admin = {
-      id: newId,
-      name: adminData.name,
-      mail: adminData.mail,
-      username: adminData.username,
-      password: adminData.password,
-      createdAt: adminData.createdAt,
-      socialLink: adminData.socialLink,
+    return {
+      message: "All admins fetched successfully",
+      data: admins
     };
+  }
 
-    this.admins.push(newAdmin);
+  async createAdmin(adminData: AdminDto) {
 
-    return { message: 'Admin created successfully', data: newAdmin };
+    const admin = this.adminRepo.create(adminData);
+
+    const savedAdmin = await this.adminRepo.save(admin);
+
+    return {
+      message: "Admin created successfully",
+      data: savedAdmin
+    };
+  }
+
+  async searchAdmin(username: string) {
+
+    const results = await this.adminRepo.find({
+      where: { username }
+    });
+
+    return {
+      message: "Search result",
+      data: results
+    };
   }
 
 
-  searchAdmin(username: string) {
-    const results = this.admins.filter(admin =>
-      admin.username.toLowerCase().includes(username.toLowerCase())
-    );
-    return results;
-  }
+  async deleteAdmin(id: number) {
 
+    const admin = await this.adminRepo.findOne({
+      where: { id }
+    });
 
-  deleteAdmin(id: number) {
-    const index = this.admins.findIndex(admin => admin.id === id);
-
-    if (index === -1) {
+    if (!admin) {
       throw new NotFoundException(`Admin with ID ${id} not found`);
     }
 
-    const deletedAdmin = this.admins[index];
-    this.admins.splice(index, 1);
+    await this.adminRepo.remove(admin);
 
-    return { message: 'Admin deleted successfully', data: deletedAdmin };
+    return {
+      message: "Admin deleted successfully",
+      data: admin
+    };
   }
 
 
-  updateAdmin(id: number, data: Partial<AdminDto>) {
-    const index = this.admins.findIndex(admin => admin.id === id);
+  async updateAdmin(id: number, data: Partial<AdminDto>) {
 
-    if (index === -1) {
+    const admin = await this.adminRepo.findOne({
+      where: { id }
+    });
+
+    if (!admin) {
       throw new NotFoundException(`Admin with ID ${id} not found`);
     }
 
+    Object.assign(admin, data);
 
-    this.admins[index] = { ...this.admins[index], ...data };
+    const updatedAdmin = await this.adminRepo.save(admin);
 
-    return { message: 'Admin updated successfully', data: this.admins[index] };
+    return {
+      message: "Admin updated successfully",
+      data: updatedAdmin
+    };
   }
-
 
   getAllSellers() {
-    return { message: 'Rohim,Korim' };
+    return {
+      message: "Rohim, Korim"
+    };
   }
 
+  
   getAllCategories() {
-    return { message: 'No-categoris' };
+    return {
+      message: "No categories"
+    };
   }
+
+  
+  // User Category 4 Functions
+ 
+
+ 
+  async createUser() {
+
+    const user = this.adminRepo.create();
+
+    const savedUser = await this.adminRepo.save(user);
+
+    return {
+      message: "User created successfully",
+      data: savedUser
+    };
+  }
+
+  
+  async updateCountry(id: number, country: string) {
+
+    const user = await this.adminRepo.findOne({
+      where: { id }
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    user.country = country;
+
+    const updatedUser = await this.adminRepo.save(user);
+
+    return {
+      message: "Country updated successfully",
+      data: updatedUser
+    };
+  }
+
+
+  async findByJoiningDate(date: string) {
+
+    const users = await this.adminRepo.find({
+      where: { joiningDate: new Date(date) }
+    });
+
+    return {
+      message: "Users by joining date",
+      data: users
+    };
+  }
+
+ 
+  async findDefaultCountry() {
+
+    const users = await this.adminRepo.find({
+      where: { country: 'Unknown' }
+    });
+
+    return {
+      message: "Users with default country",
+      data: users
+    };
+  }
+
 }
