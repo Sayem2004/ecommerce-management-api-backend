@@ -1,43 +1,73 @@
-import { Injectable } from "@nestjs/common";
-import { DeliverymanDTO } from "./deliveryman.dto";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Deliveryman } from './deliveryman.entity';
+import { DeliverymanDTO } from './deliveryman.dto';
+import { IsNull } from 'typeorm';
 
 @Injectable()
 export class DeliverymanService {
+  constructor(
+    @InjectRepository(Deliveryman)
+    private repo: Repository<Deliveryman>,
+  ) {}
 
-    private data: DeliverymanDTO[] = [];
-    
-    getAll(): object {
-        return { message: "All Deliveryman Show", data: this.data };
+  // Create a deliveryman
+  async create(info: DeliverymanDTO) {
+    const deliveryman = this.repo.create(info);
+    return await this.repo.save(deliveryman);
+  }
+
+  // List all deliverymen
+  async getAll() {
+    return await this.repo.find();
+  }
+
+  // Get by ID
+  async getById(id: string) {
+    return await this.repo.findOne({ where: { id } });
+  }
+
+  // Get by ID and fullName (optional)
+  async getByIdAndName(id: string, fullName?: string) {
+    if (fullName) {
+      return await this.repo.findOne({ where: { id, fullName } });
+    } else {
+      return await this.repo.findOne({ where: { id } });
     }
+  }
 
-    getById(id: number): object {
-        return { message: "Deliveryman Found", id: id };
-    }
+  // Update all info
+  async update(id: string, info: DeliverymanDTO) {
+    await this.repo.update(id, info);
+    return { message: 'Updated', id, data: info };
+  }
 
-    getByIdAndName(id: number, name: string): object {
-        return { message: "Deliveryman Found", id: id, name: name };
-    }
+  // Update status only
+  async updateStatus(id: string, status: string) {
+    await this.repo.update(id, { status });
+    return { message: 'Status Updated', id, status };
+  }
 
-    create(info: DeliverymanDTO): object {
-        this.data.push(info);
-        return { message: "Created", data: info };
-    }
+  // Update phone only
+  async updatePhone(id: string, phone: number) {
+    await this.repo.update(id, { phone });
+    return { message: 'Phone Updated', id, phone };
+  }
 
-    update(id: number, info: DeliverymanDTO): object {
-        return { message: "Updated", id: id, data: info };
-    }
+  // Delete deliveryman
+  async remove(id: string) {
+    await this.repo.delete(id);
+    return { message: 'Deleted', id };
+  }
 
-    updateStatus(id: number, status: string): object {
-        return { message: "Status Updated", id: id, status: status };
-    }
+  // Search by area
+  async search(area: string) {
+    return await this.repo.find({ where: { area } });
+  }
 
-    remove(id: number): object {
-        return { message: "Deleted", id: id };
-    }
-
-    search(area: string): object {
-        return { message: "Search Result", area: area };
-    }
-
-   
+  // Get deliverymen with null fullName
+  async getNullFullName() {
+    return await this.repo.find({ where: { fullName: IsNull() } });
+  }
 }
