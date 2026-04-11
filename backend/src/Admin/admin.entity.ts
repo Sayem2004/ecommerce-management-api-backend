@@ -12,38 +12,34 @@ import { v4 as uuidv4 } from 'uuid';
 export class Admin {
 
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  mail: string;
+  mail!: string;
 
   @Column()
-  username: string;
+  username!: string;
 
   @Column()
-  password: string;
+  password!: string;
 
   @Column()
-  socialLink: string;
+  socialLink!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
-
-  @Column({ type: 'date', nullable: true })
-  joiningDate: Date;
+  joiningDate!: Date;
 
   @Column({ default: 'Unknown' })
-  country: string;
+  country!: string;
 
-  @Column()
-  uniqueId: string;
+  @Column({ length: 150 })
+  uniqueId!: string;
 
   @BeforeInsert()
   generateUUID() {
     this.uniqueId = uuidv4();
   }
-
 }

@@ -3,43 +3,39 @@ import {
   IsString,
   Matches,
   IsDateString,
-  IsUrl
+  IsUrl,
+  IsEmail
 } from 'class-validator';
 
 export class AdminDto {
-
 
   @IsNotEmpty()
   @IsString()
   @Matches(/^[^0-9]*$/, {
     message: 'Name must not contain numbers',
   })
-  name: string;
+  name!: string;
 
-
-  @IsNotEmpty()
-  mail: string;
-
+  @IsNotEmpty({ message: "Enter mail" })
+  @IsEmail({}, { message: "Please enter a valid email address" }) mail!: string;
 
   @IsNotEmpty()
-  username: string;
+  username!: string;
 
   @IsNotEmpty()
   @Matches(/[@#$&]/, {
-    message: 'Password must contain at least one special character (@, #, $, &)',
+    message: 'Password must contain (@, #, $, &)',
   })
-  password: string;
+  password!: string;
 
   @IsNotEmpty()
   @IsDateString({}, { message: 'Invalid date format' })
-  createdAt: string;
+  createdAt!: string;
 
   @IsNotEmpty()
   @IsUrl(
-    {
-      require_protocol: true,
-    },
-    { message: 'Invalid social media URL' },
+    { require_protocol: true },
+    { message: 'Invalid social media URL' }
   )
-  socialLink: string;
+  socialLink!: string;
 }

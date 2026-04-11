@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ILike } from 'typeorm';
 
 import { AdminDto } from './dto/admin.dto';
 import { Admin } from './admin.entity';
@@ -11,49 +12,72 @@ export class AdminService {
   constructor(
     @InjectRepository(Admin)
     private adminRepo: Repository<Admin>,
-  ) {}
+  ) { }
 
+  private removePassword(admin: Admin) {
+    const { password, ...rest } = admin;
+    return rest;
+  }
 
   async findAll() {
     const admins = await this.adminRepo.find();
-    
 
     return {
       message: "All admins fetched successfully",
-      data: admins
+      data: admins.map(admin => this.removePassword(admin))
     };
   }
 
-  async createAdmin(adminData: AdminDto) {
+  async getAdminById(id: number) {
+    const admin = await this.adminRepo.findOne({ where: { id } });
 
-    const admin = this.adminRepo.create(adminData);
-
-    const savedAdmin = await this.adminRepo.save(admin);
+    if (!admin) {
+      throw new NotFoundException(`Admin with ID ${id} not found`);
+    }
 
     return {
-      message: "Admin created successfully",
-      data: savedAdmin
+      message: "Admin fetched successfully",
+      data: this.removePassword(admin)
     };
   }
 
-  async searchAdmin(username: string) {
 
+  async searchAdmin(username: string) {
     const results = await this.adminRepo.find({
-      where: { username }
+      where: {
+        username: ILike(`%${username}%`)
+      }
     });
 
     return {
       message: "Search result",
-      data: results
+      data: results.map(admin => this.removePassword(admin))
     };
   }
 
+  async createAdmin(adminData: AdminDto) {
+    const admin = this.adminRepo.create(adminData);
+    const savedAdmin = await this.adminRepo.save(admin);
+
+    return {
+      message: "Admin created successfully",
+      data: this.removePassword(savedAdmin)
+    };
+  }
+
+  // async searchAdmin(username: string) {
+  //   const results = await this.adminRepo.find({
+  //     where: { username }
+  //   });
+
+  //   return {
+  //     message: "Search result",
+  //     data: results.map(admin => this.removePassword(admin))
+  //   };
+  // }
 
   async deleteAdmin(id: number) {
-
-    const admin = await this.adminRepo.findOne({
-      where: { id }
-    });
+    const admin = await this.adminRepo.findOne({ where: { id } });
 
     if (!admin) {
       throw new NotFoundException(`Admin with ID ${id} not found`);
@@ -63,16 +87,12 @@ export class AdminService {
 
     return {
       message: "Admin deleted successfully",
-      data: admin
+      data: this.removePassword(admin)
     };
   }
 
-
   async updateAdmin(id: number, data: Partial<AdminDto>) {
-
-    const admin = await this.adminRepo.findOne({
-      where: { id }
-    });
+    const admin = await this.adminRepo.findOne({ where: { id } });
 
     if (!admin) {
       throw new NotFoundException(`Admin with ID ${id} not found`);
@@ -84,46 +104,30 @@ export class AdminService {
 
     return {
       message: "Admin updated successfully",
-      data: updatedAdmin
+      data: this.removePassword(updatedAdmin)
     };
   }
 
   getAllSellers() {
-    return {
-      message: "Rohim, Korim"
-    };
+    return { message: "Rohim, Korim" };
   }
 
-  
   getAllCategories() {
-    return {
-      message: "No categories"
-    };
+    return { message: "No categories" };
   }
 
-  
-  // User Category 4 Functions
- 
-
- 
-  async createUser() {
-
-    const user = this.adminRepo.create();
-
+  async createUser(adminData: AdminDto) {
+    const user = this.adminRepo.create(adminData);
     const savedUser = await this.adminRepo.save(user);
 
     return {
       message: "User created successfully",
-      data: savedUser
+      data: this.removePassword(savedUser)
     };
   }
 
-  
   async updateCountry(id: number, country: string) {
-
-    const user = await this.adminRepo.findOne({
-      where: { id }
-    });
+    const user = await this.adminRepo.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -135,34 +139,38 @@ export class AdminService {
 
     return {
       message: "Country updated successfully",
-      data: updatedUser
+      data: this.removePassword(updatedUser)
     };
   }
-
 
   async findByJoiningDate(date: string) {
+    const user = await this.adminRepo
+      .createQueryBuilder("admin")
+      .where("DATE(admin.joiningDate) = :date", { date })
+      .getOne(); 
 
-    const users = await this.adminRepo.find({
-      where: { joiningDate: new Date(date) }
-    });
+    if (!user) {
+      return {
+        message: "No user found for this date",
+        data: null
+      };
+    }
+
+    const { password, ...rest } = user;
 
     return {
-      message: "Users by joining date",
-      data: users
+      message: "Admin fetched successfully",
+      data: rest
     };
   }
-
- 
   async findDefaultCountry() {
-
     const users = await this.adminRepo.find({
       where: { country: 'Unknown' }
     });
 
     return {
       message: "Users with default country",
-      data: users
+      data: users.map(user => this.removePassword(user))
     };
   }
-
 }
