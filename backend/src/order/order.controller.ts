@@ -1,22 +1,39 @@
-import { Controller, Post, Get, Param, Body, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Param,
+  Body,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
 import { OrderDTO } from './order.dto';
 
 @Controller('order')
 export class OrderController {
-  constructor(private readonly service: OrderService) {}
+  constructor(private service: OrderService) {}
 
   @Post('create/:deliverymanId')
   @UsePipes(new ValidationPipe())
-  createOrder(
-    @Param('deliverymanId') deliverymanId: string,
-    @Body() info: OrderDTO,
+  create(
+    @Param('deliverymanId') id: string,
+    @Body() body: OrderDTO,
   ) {
-    return this.service.createOrder(deliverymanId, info);
+    return this.service.create(id, body);
   }
 
-  @Get('deliveryman/:deliverymanId')
-  getOrdersByDeliveryman(@Param('deliverymanId') deliverymanId: string) {
-    return this.service.getOrdersByDeliveryman(deliverymanId);
+  @Get('deliveryman/:id')
+  get(@Param('id') id: string) {
+    return this.service.getByDeliveryman(id);
   }
+
+  @Put('update/:orderId')
+update(
+  @Param('orderId') orderId: number,
+  @Body() body: OrderDTO,
+) {
+  return this.service.update(orderId, body);
+}
 }

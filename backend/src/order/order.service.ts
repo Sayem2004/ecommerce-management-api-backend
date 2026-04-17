@@ -1,43 +1,40 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { Order } from './order.entity';
 import { Deliveryman } from '../deliveryman/deliveryman.entity';
-import { OrderDTO } from './order.dto';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order)
-    private orderRepo: Repository<Order>,
+    private repo: Repository<Order>,
 
     @InjectRepository(Deliveryman)
-    private deliverymanRepo: Repository<Deliveryman>,
+    private dmRepo: Repository<Deliveryman>,
   ) {}
 
-  async createOrder(deliverymanId: string, info: OrderDTO) {
-    const deliveryman = await this.deliverymanRepo.findOne({
+  async create(deliverymanId: string, body: any) {
+    const dm = await this.dmRepo.findOne({
       where: { id: deliverymanId },
     });
 
-    if (!deliveryman) {
-      throw new NotFoundException('Deliveryman not found');
-    }
-
-    const order = this.orderRepo.create({
-      ...info,
-      deliveryman,
+    const order = this.repo.create({
+      ...body,
+      deliveryman: dm!,
     });
 
-    return await this.orderRepo.save(order);
+    return this.repo.save(order);
   }
-
-  async getOrdersByDeliveryman(deliverymanId: string) {
-    return await this.orderRepo.find({
-      where: {
-        deliveryman: { id: deliverymanId },
-      },
+  getByDeliveryman(id: string) {
+    return this.repo.find({
+      where: { deliveryman: { id } },
       relations: ['deliveryman'],
     });
   }
+async update(orderId: number, body: any) {
+  return this.repo.update(orderId, body);
+}
+
 }

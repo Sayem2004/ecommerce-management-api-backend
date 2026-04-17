@@ -1,31 +1,34 @@
-import { IsNotEmpty, IsEmail, MinLength, Matches, IsIn, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  MinLength,
+  Matches,
+  IsIn,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class DeliverymanDTO {
+  @IsOptional()
+  fullName!: string;
 
-    @IsOptional()
-    fullName?: string;
+  //@IsEmail()
+ // email!: string;
 
-    @IsEmail({}, { message: 'Email must be valid and aiub.edu domain' })
-    @Matches(/@aiub\.edu$/, { message: 'Email invalid' })
-    email!: string;
+  //@MinLength(6)
+ // @Matches(/[A-Z]/)
+ // password!: string;
 
-    @IsNotEmpty()
-    @MinLength(6)
-    @Matches(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-    password!: string;
+ // @IsIn(['male', 'female'])
+ // gender!: string;
 
-    @IsIn(['male','female'])
-    gender!: string;
+ // @IsNumber()
+ // phone!: number;   
 
-    @Matches(/^[0-9]+$/, { message: 'Phone number must contain only numbers' })
-    phone!: number;
+ @IsNotEmpty()
+  area!: string;
 
-    @IsNotEmpty()
-    area!: string;
-
-    @IsIn(['active','inactive'])
-    status!: string;
-
-    @IsBoolean()
-    active!: boolean;
+  @IsIn(['active', 'inactive'])
+ status!: string;
 }

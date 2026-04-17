@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Deliveryman } from '../deliveryman/deliveryman.entity';
 
 @Entity('orders')
@@ -15,8 +15,6 @@ export class Order {
   @Column()
   status!: string;
 
-  @ManyToOne(() => Deliveryman, (deliveryman) => deliveryman.orders, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Deliveryman, (deliveryman) => deliveryman.orders)
   deliveryman!: Deliveryman;
 }
